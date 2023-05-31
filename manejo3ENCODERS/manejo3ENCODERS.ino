@@ -9,12 +9,11 @@ int sentgir4 = 1; // Variable para el pin 36
 int sentgir5 = 1; // Variable para el pin 37 
 int pwm;    // Variable para el pin 2, 3, 4, 5, 6, 7 
 
-bool encoder1; //Variable para el pin 22
+int encoder1 = 22; //Variable para el pin 22
 int encoder2 = 24; //Variable para el pin 24
 int encoder3 = 26; //Variable para el pin 26
 int encoder4x = 28; //Variable para el pin 28
 int encoder4z = 31; //Variable para el pin 31
-int encoder5 = 12; //SIN INFORMACION DE UN DATO
 
 int fincarrera1 = 23; //Variable para el pin 23
 int fincarrera2 = 25; //Variable para el pin 25
@@ -26,12 +25,20 @@ int fincarrera5 = 30; //Variable para el pin 30
 const float pi = 3.1415;
 const float deg2rad = pi/180;
 const float vel2pwm = 255/100;
-const float eje1 = 245698;
-const float eje2 = 139260;
-const float eje3 = 115988;
-const float eje4x = 37260;
-const float eje4z = 74590;
-const float eje5 = 68238;
+const int eje1 = 245698;
+const int eje2 = 139260;
+const int eje3 = 115988;
+const int eje4x = 37260;
+const int eje4z = 74590;
+const int eje5 = 68238;
+const float kp1= 1.44;
+const float kp2= 1.11;
+const float kp3= 0.54;
+const float kp4x= 0.22;
+const float kp4z= 0.27;
+const int k1 = 15;
+const int k2 = 20;
+const int k3 = 8;
 float L1;
 float L2;
 float L3;
@@ -104,14 +111,29 @@ int enco5(int q){
   int value = round(q*eje4z/(2*pi));  //CAMBIA POR SER LA PINZA 
   return value;}
 
+int control1(Oi, Oe, e){
+  if (Oe <= Oe/2){
+    v1 = -kp1*(Oe-e); 
+  }
+  else{
+    v1 = kp1*Oe
+  }
+  
+}
+
 void homePos(){
   float* fincarrer;
+  float E = 90;
+  float e = 0;
+  float v1;
   fincarrer = fincarrera();
   float finc1 = fincarrer[0];
   while(fincarrer[0] == finc1){ //MOTOR 1
     if (fincarrer[0] == 0){
+      v1 = control(0, deg2rad*E, e);
       //Mover motores para que lamb sea <180
-      mover1(0, pwm);
+      mover1(0, v1);
+      e = enco1();
     }
     else {
       //Mover para que lamb sea >180
