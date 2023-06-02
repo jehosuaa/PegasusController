@@ -55,6 +55,12 @@ int contarflancos3 = 0;
 int contarflancos4x = 0;
 int contarflancos4z = 0;
 int contarflancos5 = 0;
+int contarf1 = 0;  // Contadores para los CONTROLES
+int contarf2 = 0;
+int contarf3 = 0;
+int contarf4x = 0;
+int contarf4z = 0;
+int contarf5 = 0;
 String msg;
 
 float* posicion(float* q){
@@ -111,30 +117,36 @@ int enco5(int q){
   int value = round(q*eje4z/(2*pi));  //CAMBIA POR SER LA PINZA 
   return value;}
 
-int control1(Oi, Oe, e){
-  if (Oe <= Oe/2){
-    v1 = -kp1*(Oe-e); 
-  }
-  else{
-    v1 = kp1*Oe
-  }
-  
+void inc1(){
+  contarf1++;
+}
+
+float control1(float Oe, e){
+  float v1 = kp1*(Oe-e); 
+  return v1;
 }
 
 void homePos(){
   float* fincarrer;
-  float E = 90;
+  float E = deg2rad*10;
   float e = 0;
   float v1;
   fincarrer = fincarrera();
   float finc1 = fincarrer[0];
   while(fincarrer[0] == finc1){ //MOTOR 1
     if (fincarrer[0] == 0){
-      v1 = control(0, deg2rad*E, e);
+      v1 = control1(E, e);
       //Mover motores para que lamb sea <180
-      mover1(0, v1);
-      e = enco1();
-    }
+      if ((pwm-v1) < pwm){
+        mover1(0, (pwm - v1));}
+      else{
+        mover1(0, pwm);}
+      attachInterrupt(digitalPinToInterrupt(22), inc1, HIGH);
+      if (e < E/2){
+        e = contarf1*2*pi/eje1;}
+      else{
+        float f = contarf1*2*pi/eje1;
+        e = E - f;}
     else {
       //Mover para que lamb sea >180
       mover1(1, pwm);
