@@ -1,27 +1,31 @@
-#include <Math.h>
-//#include <SoftwareSerial.h>
+//INPUTS - OUTPUTS
+int m1 = 34;
+int m2 = 33;
+int m3 = 32;
+int m4x = 35;
+int m4z = 36;
+int mpinza = 37;
 
-int sentgir = 1; // Variable para el pin 32 
-int sentgir1 = 1; // Variable para el pin 33 
-int sentgir2 = 1; // Variable para el pin 34 
-int sentgir3 = 1; // Variable para el pin 35 
-int sentgir4 = 1; // Variable para el pin 36 
-int sentgir5 = 1; // Variable para el pin 37 
-int pwm;    // Variable para el pin 2, 3, 4, 5, 6, 7 
+int m1v = 4;
+int m2v = 3;
+int m3v = 2;
+int m4xv = 5;
+int m4zv = 6;
+int mpinzav = 7;
 
-int encoder1 = 22; //Variable para el pin 22
-int encoder2 = 24; //Variable para el pin 24
-int encoder3 = 26; //Variable para el pin 26
-int encoder4x = 28; //Variable para el pin 28
-int encoder4z = 31; //Variable para el pin 31
+int encoder1 = 22;
+int encoder2 = 24;
+int encoder3 = 26;
+int encoder4x = 28;
+int encoder4z = 31;
 
-int fincarrera1 = 23; //Variable para el pin 23
-int fincarrera2 = 25; //Variable para el pin 25
-int fincarrera3 = 27; //Variable para el pin 27
-int fincarrera4 = 29; //Variable para el pin 29
-int fincarrera5 = 30; //Variable para el pin 30
+int fincarrera1 = 23;
+int fincarrera2 = 25;
+int fincarrera3 = 27;
+int fincarrera4x = 30;
+int fincarrera4z = 29;
 
-//VARIABLES
+//CONSTANTES
 const float pi = 3.1415;
 const float deg2rad = pi/180;
 const float vel2pwm = 255/100;
@@ -39,56 +43,81 @@ const float kp4z= 0.27;
 const int k1 = 15;
 const int k2 = 20;
 const int k3 = 8;
-float L1;
-float L2;
-float L3;
-float L4;
+const float L1 = 23;
+const float L2 = 23;
+const float L3 = 23;
+const float L4 = 7;
+
+int sentgir = 1; // Variable para el pin 32 
+int sentgir1 = 1; // Variable para el pin 33 
+int sentgir2 = 1; // Variable para el pin 34 
+int sentgir3 = 1; // Variable para el pin 35 
+int sentgir4 = 1; // Variable para el pin 36 
+int sentgir5 = 1; // Variable para el pin 37 
+int pwm;    // Variable para el pin 2, 3, 4, 5, 6, 7 
+
+//VARIABLES
+String msg;
 float px;
 float py;
 float pz;
 int elegido;
 int rango;
 int giro;
-int contarflancos1 = 0;  // Contadores para los encoders
-int contarflancos2 = 0;
-int contarflancos3 = 0;
-int contarflancos4x = 0;
-int contarflancos4z = 0;
-int contarflancos5 = 0;
-int contarf1 = 0;  // Contadores para los CONTROLES
-int contarf2 = 0;
-int contarf3 = 0;
-int contarf4x = 0;
-int contarf4z = 0;
-int contarf5 = 0;
-String msg;
+double v1;
+volatile int contarflancos1 = 0;  // Contadores para los encoders
+volatile int contarflancos2 = 0;
+volatile int contarflancos3 = 0;
+volatile int contarflancos4x = 0;
+volatile int contarflancos4z = 0;
+volatile int contarflancos5 = 0;
+int decision1;
+int decision2;
+int decision3;
+int decision4x;
+int decision4z;
+volatile int contarf1 = 0; // Contadores para los CONTROLES
+volatile int contarf2 = 0;
+volatile int contarf3 = 0;
+volatile int contarf4x= 0;
+volatile int contarf4z= 0;
+volatile int contarf5= 0;
+volatile int finca1 = 0;
+volatile int finca2 = 0;
+volatile int finca3 = 0;
+volatile int finca4x = 0;
+volatile int finca4z = 0;
+volatile int enp = 0;
+volatile float ep = 0;
 
-float* posicion(float* q){
-  px = cos(deg2rad*q[0]) * (L2*cos(deg2rad * q[1]) + L3*cos((deg2rad * q[1]) + (deg2rad * q[2])) + L4*cos((deg2rad * q[1]) + (deg2rad * q[2]) + (deg2rad * q[3])));
-  py = sin(deg2rad*q[0]) * (L2*cos(deg2rad * q[1]) + L3*cos((deg2rad * q[1]) + (deg2rad * q[2])) + L4*cos((deg2rad * q[1]) + (deg2rad * q[2]) + (deg2rad * q[3])));
-  pz = L1 + L2*sin(deg2rad * q[1]) + L3*sin((deg2rad * q[1]) + (deg2rad * q[2])) + L4*sin((deg2rad * q[1]) + (deg2rad * q[2]) + (deg2rad * q[3]));
+
+float* posicion(int q1, int q2, int q3, int q4){
+  px = cos(deg2rad*q1) * (L2*cos(deg2rad * q2) + L3*cos((deg2rad * q2) + (deg2rad * q3)) + L4*cos((deg2rad * q2) + (deg2rad * q3) + (deg2rad * q4)));
+  py = sin(deg2rad*q1) * (L2*cos(deg2rad * q2) + L3*cos((deg2rad * q2) + (deg2rad * q3)) + L4*cos((deg2rad * q2) + (deg2rad * q3) + (deg2rad * q4)));
+  pz = L1 + L2*sin(deg2rad * q2) + L3*sin((deg2rad * q2) + (deg2rad * q3)) + L4*sin((deg2rad * q2) + (deg2rad * q3) + (deg2rad * q4));
   float pos[3] = {px, py, pz};
-  return pos;
-}
-float* fincarrera(){
- int finc1 = digitalRead(fincarrera1);
- int finc2 = digitalRead(fincarrera2);
- int finc3 = digitalRead(fincarrera3);
- int finc4 = digitalRead(fincarrera4);
- int finc5 = digitalRead(fincarrera5);
- float finales[5] = {finc1, finc2, finc3, finc4, finc5};
- return finales;
-}
+  return pos;}
+  
+void finc1(){
+  finca1 = digitalRead(fincarrera1); }
+void finc2(){
+  finca2 = digitalRead(fincarrera2);  }
+void finc3(){
+  finca3 = digitalRead(fincarrera3);  }
+void finc4x(){
+  finca4x = digitalRead(fincarrera4x);  }
+void finc4z(){
+  finca4z = digitalRead(fincarrera4z);  }
 
 void mover1(int sg, int vel){
-  digitalWrite(32, sg);
-  analogWrite(2, vel);}
+  digitalWrite(34, sg);
+  analogWrite(4, vel);}
 void mover2(int sg, int vel){
   digitalWrite(33, sg);
   analogWrite(3, vel);}
 void mover3(int sg, int vel){
-  digitalWrite(34, sg);
-  analogWrite(4, vel);}
+  digitalWrite(32, sg);
+  analogWrite(2, vel);}
 void mover4x(int sg, int vel){
   digitalWrite(35, sg);
   analogWrite(5, vel);}
@@ -118,222 +147,401 @@ int enco5(int q){
   return value;}
 
 void inc1(){
-  contarf1++;
+  contarf1++;}
+void inc2(){
+  contarf2++;}
+void inc3(){
+  contarf3++;}
+void inc4x(){
+  contarf4x++;}
+void inc4z(){
+  contarf4z++;}
+
+double control1(float Oe, float e){
+  double v1 = kp1*(Oe-e); 
+  return v1;}
+double control2(float Oe, float e, float th1, float th2){
+  double v1 = kp2*(Oe-e)+((k1*cos(th1)+k2*cos(th1+th2))*cos(th2)); 
+  return v1;}
+double control3(float Oe, float e, float th1, float th2){
+  double v1 = kp3*(Oe-e)+k3*sin(th1 + th2); 
+  return v1;}
+double control4x(float Oe, float e){
+  double v1 = kp4x*(Oe-e); 
+  return v1;}
+double control4z(float Oe, float e){
+  double v1 = kp4z*(Oe-e); 
+  return v1;}
+
+void moverse1(int E, int pwm, int gs, bool hom = false){
+  while(E > ep && hom == false){
+    attachInterrupt(digitalPinToInterrupt(encoder1), inc1, RISING);
+    v1 = control1(E, enp);
+    if((pwm-round(v1)) < 60){mover1(gs, 70);}
+    else if((pwm-round(v1)) < pwm){mover1(gs, (pwm-round(v1)));}
+    else{mover1(gs, pwm);}
+    if (ep < E/2){enp = ep;}
+    else{enp = E - ep;}
+    if (gs == 1){contarflancos1 += ep;}
+    else{contarflancos1 -= ep;}
+    ep = contarf1*360/eje1;}
+  enp = 0;
+  ep = 0;
+  contarf1 = 0;
+}
+void moverse2(int E, int pwm, int gs, bool hom = false){
+  while(E > ep && hom == false){
+    attachInterrupt(digitalPinToInterrupt(encoder2), inc2, RISING);
+    v1 = control2(E, enp, ep, contarflancos3);
+    if((pwm-round(v1)) < 60){mover2(gs, 70);}
+    else if((pwm-round(v1)) < pwm){mover2(gs, (pwm-round(v1)));}
+    else{mover2(gs, pwm);}
+    if (ep < E/2){enp = ep;}
+    else{enp = E - ep;}
+    if (gs == 1){contarflancos2 += ep;}
+    else{contarflancos2 -= ep;}
+    ep = contarf2*180/eje2;}
+  enp = 0;
+  ep = 0;
+  contarf2 = 0;
+}
+void moverse3(int E, int pwm, int gs, bool hom = false){
+  while(E > ep && hom == false){
+    attachInterrupt(digitalPinToInterrupt(encoder3), inc3, RISING);
+    v1 = control3(E, enp, contarflancos2, ep);
+    if((pwm-round(v1)) < 60){mover3(gs, 70);}
+    else if((pwm-round(v1)) < pwm){mover3(gs, (pwm-round(v1)));}
+    else{mover3(gs, pwm);}
+    if (ep < E/2){enp = ep;}
+    else{enp = E - ep;}
+    if (gs == 1){contarflancos3 += ep;}
+    else{contarflancos3 -= ep;}
+    ep = contarf3*180/eje3;}
+  enp = 0;
+  ep = 0;
+  contarf3 = 0;
+}
+void moverse4x(int E, int pwm, int gs, bool hom = false){
+  while(E > ep && hom == false){
+    attachInterrupt(digitalPinToInterrupt(encoder4x), inc4x, RISING);
+    v1 = control4x(E, enp);
+    if((pwm-round(v1)) < 60){mover4x(gs, 70);}
+    else if((pwm-round(v1)) < pwm){mover4x(gs, (pwm-round(v1)));}
+    else{mover4x(gs, pwm);}
+    if (ep < E/2){enp = ep;}
+    else{enp = E - ep;}
+    if (gs == 1){contarflancos4x += ep;}
+    else{contarflancos4x -= ep;}
+    ep = contarf4x*180/eje4x;}
+  enp = 0;
+  ep = 0;
+  contarf4x = 0;
+}
+void moverse4z(int E, int pwm, int gs, bool hom = false){
+  while(E > ep && hom == false){
+    attachInterrupt(digitalPinToInterrupt(encoder4z), inc4z, RISING);
+    v1 = control4z(E, enp);
+    if((pwm-round(v1)) < 60){mover4z(gs, 70);}
+    else if((pwm-round(v1)) < pwm){mover4z(gs, (pwm-round(v1)));}
+    else{mover4z(gs, pwm);}
+    if (ep < E/2){enp = ep;}
+    else{enp = E - ep;}
+    if (gs == 1){contarflancos4z += ep;}
+    else{contarflancos4z -= ep;}
+    ep = contarf4z*360/eje4z;}
+  enp = 0;
+  ep = 0;
+  contarf4z = 0;
 }
 
-float control1(float Oe, e){
-  float v1 = kp1*(Oe-e); 
-  return v1;
+void moverpinza(int swi, int pwm){
+  
 }
 
 void homePos(){
-  float* fincarrer;
-  float E = deg2rad*10;
-  float e = 0;
+  float E = 90;
   float v1;
-  fincarrer = fincarrera();
-  float finc1 = fincarrer[0];
-  while(fincarrer[0] == finc1){ //MOTOR 1
-    if (fincarrer[0] == 0){
-      v1 = control1(E, e);
-      //Mover motores para que lamb sea <180
-      if ((pwm-v1) < pwm){
-        mover1(0, (pwm - v1));}
+  while(finca1 == decision1 ){
+    if(finca1 == 1){
+      attachInterrupt(digitalPinToInterrupt(encoder1), inc1, RISING);
+      v1 = control1(E, enp);
+      if((pwm-round(v1)) < 60){mover1(1, 70);}
+      else if((pwm-round(v1)) < pwm){mover1(1, (pwm-round(v1)));}
+      else{mover1(1, pwm);}
+      if (ep < E/2){enp = ep;}
+      else{enp = E - ep;}
+      ep = contarf1*2*180/eje1;}
+    else{
+      attachInterrupt(digitalPinToInterrupt(encoder1), inc1, RISING);
+      v1 = control1(E, enp);
+      if((pwm-round(v1)) < 60){mover1(0, 70);}
+      else if((pwm-round(v1)) < pwm){mover1(0, (pwm-round(v1)));}
+      else{mover1(0, pwm);}
+      if (ep < E/2){
+        ep = contarf1*2*180/eje1;
+        enp = ep;}
       else{
-        mover1(0, pwm);}
-      attachInterrupt(digitalPinToInterrupt(22), inc1, HIGH);
-      if (e < E/2){
-        e = contarf1*2*pi/eje1;}
-      else{
-        float f = contarf1*2*pi/eje1;
-        e = E - f;}
-    else {
-      //Mover para que lamb sea >180
-      mover1(1, pwm);
-    }
-    fincarrer = fincarrera(); 
-  }
-  contarflancos1 = eje1/2;
-  float finc2 = fincarrer[1];
-  while(fincarrer[1] == finc2){ //MOTOR 2
-    if (fincarrer[1] == 0){
-      //Mover motores para que lamb sea <90
-      mover2(0, pwm);
-    }
-    else {
-      //Mover para que lamb sea >180
-      mover2(1, pwm);
-    }
-    fincarrer = fincarrera(); 
-  }
-  contarflancos2 = eje2/2;
-  float finc3 = fincarrer[2];
-  while(fincarrer[2] == finc3){ //MOTOR 3
-    if (fincarrer[2] == 0){
-      //Mover motores para que lamb sea 0
-      mover3(0, pwm);
-    }
-    else {
-      //Ya esta en poscion
-      mover3(0, 0);
-    }
-    fincarrer = fincarrera(); 
-  }
-  contarflancos3 = eje3/2;  //aqui va 90° o 0°?
+        ep = contarf1*360/eje1;
+        enp = E - ep;}}
+  attachInterrupt(digitalPinToInterrupt(fincarrera1), finc1, CHANGE);}
+  mover1(0, 0);
+  contarflancos1 = 180;
+  enp = 0;
+  ep = 0;
+  contarf1 = 0;
   
-  while(fincarrer[4] == 0){
-      //Mover motores para que lamb sea 0
-    mover4z(0, pwm);
-    fincarrer = fincarrera(); 
+  while(finca2 == decision2 ){
+    if(finca2 == 0){
+      attachInterrupt(digitalPinToInterrupt(encoder2), inc2, RISING);
+      v1 = control2(E, enp, ep, contarflancos3);
+      if((pwm-round(v1)) < 60){mover2(1, 60);}
+      else if((pwm-round(v1)) < pwm){mover2(1, (pwm-round(v1)));}
+      else{mover2(1, pwm);}
+      if (ep < E/2){enp = ep;}
+      else{enp = E - ep;}
+      ep = contarf2*180/eje2;}
+    else{
+      attachInterrupt(digitalPinToInterrupt(encoder2), inc2, RISING);
+      v1 = control2(E, enp, ep, contarflancos3);
+      if((pwm-round(v1)) < 60){mover2(0, 60);}
+      else if((pwm-round(v1)) < pwm){mover2(0, (pwm-round(v1)));}
+      else{mover2(0, pwm);}
+      if (ep < E/2){enp = ep;}
+      else{enp = E - ep;}
+      ep = contarf2*180/eje2;}
+  attachInterrupt(digitalPinToInterrupt(fincarrera2), finc2, CHANGE);
   }
-  contarflancos5 = 0;
-  float finc4x = fincarrer[3];  //MOTOR 4 EJE Z
-  while(fincarrer[3] == finc4x){
-    if (fincarrer[3] == 0){
-      //Mover motores para que lamb sea <90
-      mover4x(0, pwm);
+  mover2(0, 0);
+  contarflancos2 = 90;
+  enp = 0;
+  ep = 0;
+  contarf2 = 0;
+  
+  while(finca3 == decision3 ){
+    if(finca3 == 0){
+      v1 = control3(E, enp, contarflancos2, ep);
+      attachInterrupt(digitalPinToInterrupt(encoder3), inc3, RISING);
+      if((pwm-round(v1)) < 60){mover3(0, 60);}
+      else if((pwm-round(v1)) < pwm){mover3(0, (pwm-round(v1)));}
+      else{mover3(0, pwm);}
+      if (ep < E/2){enp = ep;}
+      else{enp = E - ep;}
+      ep = contarf3*180/eje3;}
+    else{
+      attachInterrupt(digitalPinToInterrupt(encoder3), inc3, RISING);
+      v1 = control3(E, enp,contarflancos2,ep);
+      if((pwm-round(v1)) < 0){mover3(1, 60);}
+      else if((pwm-round(v1)) < pwm){mover3(1, (pwm-round(v1)));}
+      else{mover3(1, pwm);}
+      if (ep < E/2){enp = ep;}
+      else{enp = E - ep;}
+      ep = contarf3*180/eje3;}
+  attachInterrupt(digitalPinToInterrupt(fincarrera3), finc3, CHANGE);
+  }
+  contarflancos3 = 90;
+  mover3(0, v1);
+  enp = 0;
+  ep = 0;
+  contarf3 = 0;
+
+  while(finca4z == decision4z ){
+
+    Serial.println(decision4z);
+    if(finca4z == 1){
+      v1 = control1(E, enp);
+      attachInterrupt(digitalPinToInterrupt(encoder4x), inc4x, RISING);
+      //Serial.println(finca4x);
+      if((pwm-round(v1)) < 60){
+        mover4x(0, 50);
+        mover4z(1, 50);}
+      else if((pwm-round(v1)) < pwm){
+        mover4x(0, (pwm-round(v1)));
+        mover4z(1, (pwm-round(v1)));}
+      else{
+        mover4x(0, pwm);
+        mover4z(1, pwm);}
+      if (ep < E/2){enp = ep;}
+      else{enp = E - ep;}
+      ep = contarf4z*360/eje4z;
     }
-    else {
-      //Mover para que lamb sea sea >90
+  else{
+    attachInterrupt(digitalPinToInterrupt(encoder4x), inc4z, RISING);
+    v1 = control4z(E, enp);
+    if((pwm-round(v1)) < 60){
+      mover4x(1, 40);
+      mover4z(0, 40);}
+    else if((pwm-round(v1)) < pwm){
+      mover4x(1, (pwm-round(v1)));
+      mover4z(0, (pwm-round(v1)));}
+    else{
       mover4x(1, pwm);
+      mover4z(0, pwm);}
+    if (ep < E/2){enp = ep;}
+    else{enp = E - ep;}
+    ep = contarf4z*360/eje4z;
     }
-    fincarrer = fincarrera(); 
+  attachInterrupt(digitalPinToInterrupt(fincarrera4x), finc4x, CHANGE);
   }
-  contarflancos4x = eje4x/2;  
-  //return contarflancos1, contarflancos2, contarflancos3, contarflancos4, contarflancos4;
+  contarflancos4z = 0;
+  mover4x(0, 0);  
+  mover4z(0, 0);
+  enp = 0;
+  ep = 0;
+  contarf4z = 0;
+  finc4x();
+  decision4x = finca4x;
+
+  while(finca4x == decision4x ){
+    if(finca4x == 1){
+      v1 = control1(E, enp);
+      attachInterrupt(digitalPinToInterrupt(encoder4x), inc4x, RISING);
+      if((pwm-round(v1)) < 60){
+        mover4x(1, 70);
+        mover4z(1, 70);}
+      else if((pwm-round(v1)) < pwm){
+        mover4x(1, (pwm-round(v1)));
+        mover4z(1, (pwm-round(v1)));}
+      else{
+        mover4x(1, pwm);
+        mover4z(1, pwm);}
+      if (ep < E/2){enp = ep;}
+      else{enp = E - ep;}
+      ep = contarf4x*180/eje4x;
+    }
+    else{
+      v1 = control1(E, enp);
+      attachInterrupt(digitalPinToInterrupt(encoder4x), inc4x, RISING);
+      if((pwm-round(v1)) < 60){
+        mover4x(0, 70);
+        mover4z(0, 70);}
+      else if((pwm-round(v1)) < pwm){
+        mover4x(0, (pwm-round(v1)));
+        mover4z(0, (pwm-round(v1)));}
+      else{
+        mover4x(0, pwm);
+        mover4z(0, pwm);}
+      if (ep < E/2){enp = ep;}
+      else{enp = E - ep;}
+      ep = contarf4x*180/eje4x;
+    }
+  attachInterrupt(digitalPinToInterrupt(fincarrera4x), finc4x, CHANGE);
+  }
+  mover4x(0, 0);  
+  mover4z(0, 0);
+  contarflancos4x = 90;
+  enp = 0;
+  ep = 0;
+  contarf4x = 0;
 }
 
-void accion1(int sg, int mot,int q, int pw){
-  int contar = 0;
-  giro = sg;
-  if (mot == 0){
-    rango = enco1(q);
-    while(rango >= contar){
-      encoder1 = digitalRead(22);
-      if (encoder1 == HIGH){
-        contar++;}
-      mover1(giro, pw);}
-  mover1(giro, 0);
-  if (giro == 0){
-    contarflancos1 += rango;}
-  else{
-    contarflancos1 -= rango;}
-  contar = 0;
-  }
-  if (mot == 1){
-    rango = enco2(q);
-    while(rango >= contar){
-      encoder2 = digitalRead(24);
-      if (encoder2 == HIGH){
-        contar++;}
-      mover2(giro, pw);}
-  mover2(giro, 0);
-  if (giro == 0){
-    contarflancos2 += rango;}
-  else{
-    contarflancos2 -= rango;}
-  contar = 0;
-  }
-  if (mot == 2){
-    rango = enco3(q);
-    while(rango >= contar){
-      encoder3 = digitalRead(12); //NO EXISTE INFORMACION
-      if (encoder3 == HIGH){
-        contar++;}
-      mover3(giro, pw);}
-  mover3(giro, 0);
-  if (giro == 0){
-    contarflancos3 += rango;}
-  else{
-    contarflancos3 -= rango;}
-  contar = 0;
-  }
-  if (mot == 3){
-    rango = enco4x(q);
-    while(rango >= contar){
-      encoder4x = digitalRead(28);
-      if (encoder4x == HIGH){
-        contar++;}
-      mover4x(giro, pw);}
-  mover4x(giro, 0);
-  if (giro == 0){
-    contarflancos4x += rango;}
-  else{
-    contarflancos4x -= rango;}
-  contar = 0;
-  }
-  if (mot == 4){
-    rango = enco4z(q);
-    while(rango >= contar){
-      encoder4z = digitalRead(31);
-      if (encoder4z == HIGH){
-        contar++;}
-      mover4z(giro, pw);}
-  mover4z(giro, 0);
-  if (giro == 0){
-    contarflancos4z += rango;}
-  else{
-    contarflancos4z -= rango;}
-  contar = 0;
-  }
-  if (mot == 5){
-    rango = enco5(q);
-    while(rango >= contar){
-      encoder5 = digitalRead(26);
-      if (encoder5 == HIGH){
-        contar++;}
-      mover5(giro, pw);}
-  mover5(giro, 0);
-  if (giro == 0){
-    contarflancos5 += rango;}
-  else{
-    contarflancos5 -= rango;}
-  contar = 0;
-  }
+void accion1(int ang1, int ang2,int ang3, int ang4x, int ang4z, int pinza, int pwm){
+  int dif1 = ang1 - contarflancos1;
+  if (dif1 < 0){moverse1(abs(dif1), pwm, 0);}
+  else{moverse1(abs(dif1), pwm, 1);}
+  int dif2 = ang2 - contarflancos2;
+  if (dif2 < 0){moverse2(abs(dif2), pwm, 0);}
+  else{moverse2(abs(dif2), pwm, 1);}
+  int dif3 = ang3 - contarflancos3;
+  if (dif3 < 0){moverse3(abs(dif3), pwm, 0);}
+  else{moverse3(abs(dif3), pwm, 1);}
+  int dif4x = ang4x - contarflancos4x;
+  if (dif4x < 0){moverse4x(abs(dif4x), pwm, 0);}
+  else{moverse4x(abs(dif4x), pwm, 1);}
+  int dif4z = ang4z - contarflancos4z;
+  if (dif4z < 0){moverse4z(abs(dif4z), pwm, 0);}
+  else{moverse4z(abs(dif4z), pwm, 1);}
+  if (pinza == 1){moverpinza(1, pwm);}
 }
 
-void setup() {  
-  //SENSOR FIN DE CARRERA
-  pinMode(fincarrera1, INPUT);
-  pinMode(fincarrera2, INPUT);
-  pinMode(fincarrera3, INPUT);
-  pinMode(fincarrera4, INPUT);
-  pinMode(fincarrera5, INPUT);
-
- //ENCODERS
-  pinMode(encoder1, INPUT);
-  pinMode(encoder2, INPUT);
-  pinMode(encoder3, INPUT);
-  pinMode(encoder4x, INPUT);
-  pinMode(encoder4z, INPUT);
-  pinMode(encoder5, INPUT);
-
+void demo(){
+  homePos();
+  moverse1(30, pwm, 1);
+  moverse2(35, pwm, 1);
+  moverse3(35, pwm, 1);
+  delay(2000);
+  moverse1(30, pwm, 1);
+  moverse2(90, pwm, 1);
+  moverse3(90, pwm, 1); 
+  moverpinza(1, pwm);
+  delay(2000); 
+  moverse1(330, pwm, 1);
+  moverse2(90, pwm, 1);
+  moverse3(90, pwm, 1); 
+  delay(2000); 
+  moverse1(330, pwm, 1);
+  moverse2(35, pwm, 1);
+  moverse3(35, pwm, 1);
+  delay(2000); 
   homePos();
 }
 
-void accion2() {;
-  
+void setup() {  
+  pinMode(fincarrera1, INPUT);
+  pinMode(encoder1, INPUT_PULLUP);
+  pinMode(34, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(fincarrera2, INPUT);
+  pinMode(encoder2, INPUT_PULLUP);
+  pinMode(33, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(32, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(fincarrera3, INPUT);
+  pinMode(encoder3, INPUT_PULLUP);
+  pinMode(36, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(fincarrera4x, INPUT);
+  pinMode(encoder4x, INPUT_PULLUP);
+  pinMode(35, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(fincarrera4z, INPUT);
+  pinMode(encoder4z, INPUT_PULLUP);
+
+  finc1();
+  decision1 = finca1;
+  finc2();
+  decision2 = finca2;
+  finc3();
+  decision3 = finca3;
+  finc4z();
+  decision4x = finca4x;
+  finc4z();
+  decision4z = finca4z;
+
+  attachInterrupt(digitalPinToInterrupt(encoder1), inc1, RISING);
+  attachInterrupt(digitalPinToInterrupt(encoder2), inc2, RISING);
+  attachInterrupt(digitalPinToInterrupt(encoder3), inc3, RISING);
+  attachInterrupt(digitalPinToInterrupt(encoder4x), inc4x, RISING);
+  attachInterrupt(digitalPinToInterrupt(encoder4x), inc4z, RISING);
+
+  Serial.begin(9600);
+  homePos();
 }
 
 void loop() {
   if(Serial.available()){
     msg = Serial.readString();
-    delay(15);
-  }
-  String cinematica = msg.substring(0, 1);        // Primer carácter
-  String veloc = msg.substring(1, 4);
-  elegido = cinematica.toInt();
-  pwm = round(veloc.toInt()*vel2pwm);
-  if (elegido == 0){
-    String sengi = msg.substring(4, 5);
-    String motsel = msg.substring(5, 6);
-    String q = msg.substring(6, 7);
-    int sg = sengi.toInt();
-    int mot = motsel.toInt();
-    int grad = deg2rad*q.toInt();
-    accion1(sg, mot, grad, pwm);}
-  else {
-    accion2();
-  }
-  
+    String comando = msg.substring(0, 1);        // Primer carácter
+    elegido = comando.toInt();
+    if (elegido == 0){
+      String veloc = msg.substring(1, 4);
+      String m1 = msg.substring(4, 7);
+      String m2 = msg.substring(7, 10);
+      String m3 = msg.substring(10, 13);
+      String m4x = msg.substring(13, 16);
+      String m4z = msg.substring(16, 19);
+      String pinz = msg.substring(19, 20);
+      pwm = round(veloc.toInt()*vel2pwm);
+      int ang1 = m1.toInt();
+      int ang2 = m2.toInt();
+      int ang3 = m3.toInt();
+      int ang4x = m4x.toInt();
+      int ang4z = m4z.toInt();
+      int pinza = pinz.toInt();
+      accion1(ang1, ang2, ang3, ang4x, ang4z, pinza, pwm);
+    }
+    else{
+      demo();
+    }
+    delay(1000);}
 }
