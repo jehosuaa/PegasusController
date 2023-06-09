@@ -51,3 +51,11 @@ ARCHIVOS ADICIONALES:
 - ABRIR APLICACION DE MATLAB Y CONECTAR EL PIN 18 DEL DUE LLAMADO "TX1" CON EL PIN 1 RX DEL UNO.
 - ABRIR EL MONITOR SERIAL DEL CODIGO RecArd Y EMPEZAR A ENVIAR MENSAJES EN LA APLICACION.
 - SI TODO HA IDO BIEN EL MONITOR SERIAL MOSTRARÁ EL MENSAJE QUE FUE TRANSMITIDO.
+
+
+*********************************************************************************************************************************************
+*********************************************************************************************************************************************
+
+Escrito por: Jehosua Ben Joseph Narvaez Villota
+Ingeniería electrónica - Universidad de Antioquia
+2023
