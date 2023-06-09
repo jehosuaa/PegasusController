@@ -152,11 +152,11 @@ double control4z(float Oe, float e){
 void moverse1(int E, int pwm, int gs){    //TIENE LO NECESARIO PARA MOVER EL MOTOR DE UN ANGULO a A UNO b
 
   contarf1 = 0;
-  while(E-1 >= ep){   //ep CRECE DE 0 HASTA E EN UN RECORRIDO
-    attachInterrupt(digitalPinToInterrupt(encoder1), inc1, RISING); //PARA LEER EL CAMBIO DE FLANCO DE 0 A 1
-    v1 = control1(E, enp);                      //enp CRECERÁ HASTA LA MITAD, DE AHI SE DEVUELVE CON LA MISMA PENDIENTE
-    if((pwm-round(v1)) < 60){mover1(gs, 60);}   //VELOCIDAD MÍNIMA DE ARRANQUE
-    else if((pwm-round(v1)) < pwm){mover1(gs, (pwm-round(v1)));}  //VELOCIDAD CAMBIANTE
+  while(E-1 >= ep){   //ep CRECE DE 0 HASTA E EN UN RECORRIDO, TIENE SU VALOR EN GRADOS AL IGUAL QUE "E"
+    attachInterrupt(digitalPinToInterrupt(encoder1), inc1, RISING); //PARA SUMAR LOS CAMBIOS DEL ENCODER Y SABER CUANTO HEMOS RECORRIDO 
+    v1 = control1(E, enp);                      //enp PERTENECE AL CONTROL. CRECERÁ HASTA LA MITAD, DE AHI SE DEVUELVE CON LA MISMA PENDIENTE GENERANDO UNA RAMPA INVERTIDA
+    if((pwm-round(v1)) < 60){mover1(gs, 60);}   //VEMOS SI LA DIFERENCIA ENTRE EL PWM Y EL CONTROL ES MENOR QUE LA VELOCIDAD MÍNIMA DE ARRANQUE
+    else if((pwm-round(v1)) < pwm){mover1(gs, (pwm-round(v1)));}  //VELOCIDAD CAMBIANTE SIEMPRE RESTANDO AL PWM, ASI TAMBIEN PODREMOS FRENAR SUAVEMENTE EL MOTOR CON LA RAMPA INVERTIDA
     else{mover1(gs, pwm);}    //VELOCIDAD MÁXIMA ESTABLECIDA
     if (ep <= E/2){enp = ep;} //enp SE ENCARGA DE GENERAR UNA PENDIENTE CRECIENTE/DECRECIENTE EN EL RECORRIDO
     else{enp = E - ep;}       //CUANDO ep LLEGA A LA MITAD DE SU RECORRIDO ES NECESARIO QUE enp EMPIECE A REDUCIRSE Y CON ESTO LA VELOCIDAD
@@ -489,9 +489,7 @@ void loop() {
       int ang4x = m4x.toInt();
       int ang4z = m4z.toInt();
       int pinza = pinz.toInt();
-      accion1(ang1, ang2, ang3, ang4x, ang4z, pinza, pwm);
-    }
-  
+      accion1(ang1, ang2, ang3, ang4x, ang4z, pinza, pwm);}
     else if(elegido == 1){demo();}    //SI EL BOTON DEMO ES CLICKEADO ENTONCES REALIZARÁ LOS MOVIMIENTOS PREDETERMINADOS
     else{homePos();}                  //BOTON AUXILIAR PARA MOVER A homePos
     
