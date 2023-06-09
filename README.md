@@ -56,6 +56,7 @@ ARCHIVOS ADICIONALES:
 *********************************************************************************************************************************************
 *********************************************************************************************************************************************
 
-Escrito por: Jehosua Ben Joseph Narvaez Villota
-Ingeniería electrónica - Universidad de Antioquia
-2023
+    - Por: Jehosua Ben Joseph Narvaez Villota - Diego Alonso Quintero Moros
+    - Ingeniería electrónica - Universidad de Antioquia
+    - 2023
+
